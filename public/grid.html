@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+
+<script>
+    var map = [
+        [1,1,0,1,1,1],
+        [0,1,0,1,0,1],
+        [1,1,0,1,1,1],
+        [1,0,1,1,0,1],
+        [1,1,1,0,0,1]
+    ]
+
+
+    function minPath(grids, initial, end){
+        if(grids.length <= 0 || grids[0].length <= 0 || tw<0 || th <0){
+            return -1
+        }
+
+        var tw = end[0]
+        var th = end[1]
+
+        //移动变化：上下左右
+        var direction = [[1,0],[-1,0],[0,1],[0,-1]]
+        var m = grids.length,n = grids[0].length 
+
+        var pathArr = []
+        pathArr.push(initial)
+
+        var pathLength = 0
+
+        while(pathArr.length != 0){
+            var length = pathArr.length
+
+            //循环+1
+            pathLength++ 
+
+            while(length-- > 0){
+                var cur = pathArr.shift()
+                for(var i = 0;i<=direction.length-1;i++){
+                    nw =cur[0] + direction[i][0], nh = cur[1] +direction[i][1]
+
+                    //是否越界
+                    if(nw < 0 || nh < 0 || nw >= n || nh >= m){
+                        continue;
+                    }
+
+                    //是否障碍
+                    if(grids[nh][nw] == 0){
+                        continue;
+                    }
+
+                    //路过标记
+                    grids[nh][nw] = 0;
+                    if (nw == tw && nh == th){
+                        return pathLength;
+                    }
+                    
+                    pathArr.push([nw,nh])
+                }
+            }
+        }
+        return -1
+    }
+
+    console.log(minPath(map,[1,0], [5,4]))
+
+</script>
+</html>

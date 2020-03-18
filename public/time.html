@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>计时器</title>
+</head>
+<style>
+    #clearbtn,#pausebtn,#addbtn {
+        display: none;
+    }
+    #lists>li{
+        width: 200px;
+        display: flex;
+        justify-content: space-between;
+    }
+</style>
+<body>
+    <div>
+        <span id="time">00:00:00</span>
+    </div>
+    <ul id="lists">
+
+    </ul>
+    <div>
+        <button id="startbtn">开始</button>
+        <button id="clearbtn">复位</button>
+        <button id="addbtn">增加</button>
+        <button id="pausebtn">暂停</button>
+    </div>
+</body>
+<script>
+    var lists = document.getElementById('lists')
+
+    var startbtn = document.getElementById('startbtn')
+    var clearbtn = document.getElementById('clearbtn')
+    var pausebtn = document.getElementById('pausebtn')
+    var addbtn = document.getElementById('addbtn')
+
+    var timeText = document.getElementById('time')
+
+    var time = 0
+    var oldTime = 0
+    var timer = null
+    var listCount = 0
+    var run = false
+    
+    var setCommand = function(btn, command){
+        btn.onclick = function(){
+            command.execute()
+        }
+    }
+
+    var setTime = function(time){
+        return `${fillTime(parseInt(time/6000))}:${fillTime(parseInt(time%6000/100))}:${fillTime(time%100)}`
+    }
+
+    var fillTime = function(time){
+        return time < 10 ? '0'+ time : time
+    }
+
+    var timeLists = {
+        add: function(){
+            listCount ++ 
+            var li = document.createElement('li');
+            li.innerHTML = `<span>${listCount}</span><span>${setTime(time - oldTime)}</span><span>${setTime(time)}</span>`
+            lists.appendChild(li)
+            oldTime = time
+        },
+        start: function(){
+            if(timer && !run)return
+            startbtn.style.display = 'none'
+            clearbtn.style.display = 'none'
+            addbtn.style.display = 'inline-block'
+            pausebtn.style.display = 'inline-block'
+            startbtn.innerText = '继续'
+            timer = setInterval(()=>{
+                time ++
+                timeText.innerText = setTime(time)
+            }, 10)
+        },
+        pause: function(){
+            clearInterval(timer)
+            pausebtn.style.display = 'none'
+            addbtn.style.display = 'none'
+            clearbtn.style.display = 'inline-block'
+            startbtn.style.display = 'inline-block'
+            run = true
+
+        },
+        clear: function(){
+            time = 0
+            oldTime = 0
+            timer = null
+            listCount = 0
+            for(var i=lists.childNodes.length - 1;i>=0;i--){
+                lists.removeChild(lists.childNodes[i])
+            }
+            timeText.innerText = '00:00:00'
+            clearbtn.style.display = 'none'
+            startbtn.innerText = '开始'
+        }
+    }
+
+    var StartTimeCommand = function( receiver ){ 
+        this.receiver = receiver; 
+    };
+
+    StartTimeCommand.prototype.execute = function(){ 
+        this.receiver.start(); 
+    };
+
+    var PauseTimeCommand = function( receiver ){ 
+        this.receiver = receiver; 
+    };
+
+    PauseTimeCommand.prototype.execute = function(){ 
+        this.receiver.pause(); 
+    };
+
+
+    var AddListCommand = function( receiver ){ 
+        this.receiver = receiver; 
+    };
+
+    AddListCommand.prototype.execute = function(){ 
+        this.receiver.add(); 
+    };
+
+    var ClearListCommand = function( receiver ){ 
+        this.receiver = receiver; 
+    };
+
+    ClearListCommand.prototype.execute = function(){ 
+        this.receiver.clear(); 
+    };
+
+    var startTimeCommand = new StartTimeCommand(timeLists)
+    var pauseTimeCommand = new PauseTimeCommand(timeLists)
+    var addListCommand = new AddListCommand(timeLists)
+    var clearListCommand = new ClearListCommand(timeLists)
+
+
+    setCommand(startbtn, startTimeCommand)
+    setCommand(pausebtn, pauseTimeCommand)
+    setCommand(clearbtn, clearListCommand)
+    setCommand(addbtn, addListCommand)
+    
+</script>
+</html>
